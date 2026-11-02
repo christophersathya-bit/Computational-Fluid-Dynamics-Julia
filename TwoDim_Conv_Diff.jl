@@ -15,7 +15,7 @@ function main()
     phi_B = 0.0
     D = gamma / h           # diffusion strength
     F = rho * u             # advection strength
-    Fy = rho * v
+    Fy = rho * v            # vertical advection strength (south -> north)
 
     # Coordinates
     x = range(h/2, L - h/2, length=N)
@@ -34,57 +34,57 @@ function main()
 
         for i in 1:N, j in 1:N
             if i >= 2 && i <= N-1 && j >= 2 && j <= N-1          # interior
-                aW = D + F; aS = D + F; aE = D; aN = D
-                aP = 4*D + 2*F
+                aW = D + F; aS = D + Fy; aE = D; aN = D
+                aP = 4*D + F + Fy
                 Su = 0.0
                 phi_new[i,j] = (aW*phi[i,j-1] + aE*phi[i,j+1] + aN*phi[i-1,j] + aS*phi[i+1,j] + Su) / aP
 
             elseif i == 1 && j >= 2 && j <= N-1                  # top edge
-                aW = D + F; aS = D + F; aE = D; aN = 0.0
-                aP = 5*D + 2*F
+                aW = D + F; aS = D + Fy; aE = D; aN = 0.0
+                aP = 5*D + F + Fy
                 Su = 2*D*phi_T
                 phi_new[i,j] = (aW*phi[i,j-1] + aE*phi[i,j+1] + aS*phi[i+1,j] + Su) / aP
 
             elseif j == 1 && i >= 2 && i <= N-1                  # left edge
-                aW = 0.0; aS = D + F; aE = D; aN = D
-                aP = 5*D + 2*F
+                aW = 0.0; aS = D + Fy; aE = D; aN = D
+                aP = 5*D + F + Fy
                 Su = (2*D + F)*phi_L
                 phi_new[i,j] = (aE*phi[i,j+1] + aN*phi[i-1,j] + aS*phi[i+1,j] + Su) / aP
 
             elseif i == N && j >= 2 && j <= N-1                  # bottom edge
                 aW = D + F; aS = 0.0; aE = D; aN = D
-                aP = 5*D + 2*F
-                Su = (2*D + F)*phi_B
+                aP = 5*D + F + Fy
+                Su = (2*D + Fy)*phi_B
                 phi_new[i,j] = (aW*phi[i,j-1] + aE*phi[i,j+1] + aN*phi[i-1,j] + Su) / aP
 
             elseif j == N && i >= 2 && i <= N-1                  # right edge
-                aW = D + F; aS = D + F; aE = 0.0; aN = D
-                aP = 5*D + 2*F
+                aW = D + F; aS = D + Fy; aE = 0.0; aN = D
+                aP = 5*D + F + Fy
                 Su = 2*D*phi_R
                 phi_new[i,j] = (aW*phi[i,j-1] + aN*phi[i-1,j] + aS*phi[i+1,j] + Su) / aP
 
             elseif i == 1 && j == 1                              # top left
-                aW = 0.0; aS = D + F; aE = D; aN = 0.0
-                aP = 6*D + 2*F
+                aW = 0.0; aS = D + Fy; aE = D; aN = 0.0
+                aP = 6*D + F + Fy
                 Su = 2*D*phi_T + (2*D + F)*phi_L
                 phi_new[i,j] = (aE*phi[i,j+1] + aS*phi[i+1,j] + Su) / aP
 
             elseif i == 1 && j == N                              # top right
-                aW = D + F; aS = D + F; aE = 0.0; aN = 0.0
-                aP = 6*D + 2*F
+                aW = D + F; aS = D + Fy; aE = 0.0; aN = 0.0
+                aP = 6*D + F + Fy
                 Su = 2*D*phi_T + 2*D*phi_R
                 phi_new[i,j] = (aW*phi[i,j-1] + aS*phi[i+1,j] + Su) / aP
 
             elseif i == N && j == 1                              # bottom left
                 aW = 0.0; aS = 0.0; aE = D; aN = D
-                aP = 6*D + 2*F
-                Su = (2*D + F)*phi_B + (2*D + F)*phi_L
+                aP = 6*D + F + Fy
+                Su = (2*D + Fy)*phi_B + (2*D + F)*phi_L
                 phi_new[i,j] = (aE*phi[i,j+1] + aN*phi[i-1,j] + Su) / aP
 
             else                                                 # bottom right
                 aW = D + F; aS = 0.0; aE = 0.0; aN = D
-                aP = 6*D + 2*F
-                Su = (2*D + F)*phi_B + 2*D*phi_R
+                aP = 6*D + F + Fy
+                Su = (2*D + Fy)*phi_B + 2*D*phi_R
                 phi_new[i,j] = (aW*phi[i,j-1] + aN*phi[i-1,j] + Su) / aP
             end
 
